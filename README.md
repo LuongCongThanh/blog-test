@@ -3,9 +3,9 @@
 ## Build The blog example.
 
 * Build a personal blogs with the features of adding, editing, deleting blogs.
-* Home page : display blogs list.
+* Home page : Show blogs list.
 * Create blogs: Create or edit a blog.
-* Details blogs: Display the detailed content of the blog.
+* Details blogs: Show the detailed content of the blog.
 
 ## Library use in project :
 
