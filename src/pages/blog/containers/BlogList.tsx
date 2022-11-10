@@ -1,173 +1,124 @@
-import React, { useEffect, useState } from "react";
-import APIService from "../../../shared/services/api.service";
+import React, { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../../store/store";
+import { blogActions, list } from "../blogSlice";
+import { useNavigate } from "react-router-dom";
+import SearchBar from "../../../shared/components/SearchBar";
+import SelectOption from "../../../shared/components/SelectOption";
 
 const BlogList = () => {
-  const retrieveTutorials = () => {
-    APIService.getAllBlogsList()
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  };
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const data = useAppSelector(list);
+  const options = [
+    { key: 1, value: "", label: "Choose data field" },
+    { key: 2, value: "id", label: "ID" },
+    { key: 3, value: "title", label: "Title" },
+    { key: 4, value: "content", label: "Content" },
+    { key: 5, value: "created_at", label: "Time create Blogs" },
+    { key: 6, value: "updated_at", label: "Time update Blogs" }
+  ];
+  const sortDirection = [
+    { key: 1, value: "", label: "Choose data field" },
+    { key: 2, value: "asc", label: "asc" },
+    { key: 3, value: "desc", label: "desc" }
+  ];
   useEffect(() => {
-    retrieveTutorials();
+    dispatch(blogActions.getBlogList({ page: 1, offset: 20 }));
   }, []);
+  const searchBlogList = (data: string) => {
+    if (data) {
+      dispatch(blogActions.getBlogList({ search: data }));
+    }
+  };
+  const sortByBlogList = (value: string) => {
+    if (value) {
+      dispatch(blogActions.getBlogList({ sort_by: value }));
+    }
+  };
+  const sortDirectionBlog = (value: string) => {
+    if (value) {
+      dispatch(blogActions.getBlogList({ sort_direction: value }));
+    }
+  };
 
   return (
     <div className="bg-white py-6 sm:py-8 lg:py-12">
       <div className="mx-auto max-w-screen-xl px-4 md:px-8">
         <div className="mb-10 md:mb-16">
           <h2 className="mb-4 text-center text-2xl font-bold text-gray-800 md:mb-6 lg:text-3xl">Blog</h2>
-          <p className="mx-auto max-w-screen-md text-center text-gray-500 md:text-lg">
-            Đừng bao giờ từ bỏ. Hôm nay khó khăn, ngày mai sẽ trở nên tồi tệ. Nhưng ngày mốt sẽ có nắng
-          </p>
         </div>
-        <div className="flex flex-wrap">
-          <div className="my-4 flex flex-col items-center overflow-hidden rounded-lg border md:flex-row">
-            <div className="group relative block h-48 w-full shrink-0 self-start overflow-hidden bg-gray-100 md:h-full md:w-32 lg:w-48">
-              <img
-                src="https://images.unsplash.com/photo-1665412019489-1928d5afa5cc?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=765&amp;q=80"
-                loading="lazy"
-                alt="Mọi công việc thành đạt đều nhờ sự kiên trì và lòng say mê."
-                className="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110"
-              />
-            </div>
-            <div className="flex flex-col gap-2 p-4 lg:p-6">
-              <span className="text-sm text-gray-400">2022-10-13T11:32</span>
-              <h2 className="text-xl font-bold text-gray-800">
-                Mọi công việc thành đạt đều nhờ sự kiên trì và lòng say mê.
-              </h2>
-              <p className="text-gray-500">
-                Nghịch cảnh là một phần của cuộc sống. Nó không thể bị kiểm soát. Cái có thể kiểm soát chính là cách
-                chúng ta phản ứng trước nghịch cảnh.
-              </p>
-              <div>
-                <div className="inline-flex rounded-md shadow-sm" role="group">
-                  <button
-                    type="button"
-                    className="rounded-l-lg border border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-r-lg border-t border-b border-r border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
-                  >
-                    Delete
-                  </button>
+        <SelectOption onchange={sortDirectionBlog} option={sortDirection} nameSort="Sort by field" />
+        <SelectOption onchange={sortByBlogList} option={options} nameSort="Sort Direction" />
+        <SearchBar onSubmit={searchBlogList} />
+        <button
+          type="button"
+          className="mr-2 mb-2 w-full rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+          onClick={() => {
+            navigate(`/create-blog`);
+          }}
+        >
+          Create Blog
+        </button>
+        {data ? (
+          <div className="flex flex-wrap">
+            {data.map((item: any) => (
+              <div
+                className="my-4 flex w-full flex-col items-center overflow-hidden rounded-lg border md:flex-row"
+                key={item.id}
+              >
+                <div className="group relative block h-48 w-full shrink-0 self-start overflow-hidden bg-gray-100 md:h-full md:w-32 lg:w-48">
+                  <img
+                    src={item.image.url}
+                    alt={item.image.url}
+                    className="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110"
+                  />
+                </div>
+                <div className="flex flex-col gap-2 p-4 lg:p-6">
+                  <span className="text-sm text-gray-400">{item.created_at}</span>
+                  <h2 className="text-xl font-bold text-gray-800">{item.title}</h2>
+                  <p className="text-gray-500">{item.content}</p>
+                  <div>
+                    <div className="inline-flex rounded-md shadow-sm" role="group">
+                      <button
+                        type="button"
+                        className="m-4 rounded-lg border border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
+                        onClick={() => {
+                          navigate(`/blog-detail/${item.id}`);
+                        }}
+                      >
+                        View
+                      </button>
+                      <button
+                        type="button"
+                        className="m-4 rounded-lg border border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
+                        onClick={() => {
+                          navigate(`/edit-blog/${item.id}`, {
+                            state: {
+                              item
+                            }
+                          });
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="m-4 rounded-lg border border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
+                        onClick={() => dispatch(blogActions.removeBlog(item.id))}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
-          <div className="my-4 flex flex-col items-center overflow-hidden rounded-lg border md:flex-row">
-            <div className="group relative block h-48 w-full shrink-0 self-start overflow-hidden bg-gray-100 md:h-full md:w-32 lg:w-48">
-              <img
-                src="https://images.unsplash.com/photo-1656333422687-6830f720c38f?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=764&amp;q=80"
-                loading="lazy"
-                alt="Muốn thành công thì khao khát thành công phải lớn hơn nỗi sợ bị thất bại."
-                className="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110"
-              />
-            </div>
-            <div className="flex flex-col gap-2 p-4 lg:p-6">
-              <span className="text-sm text-gray-400">2022-10-14T11:33</span>
-              <h2 className="text-xl font-bold text-gray-800">
-                Muốn thành công thì khao khát thành công phải lớn hơn nỗi sợ bị thất bại.
-              </h2>
-              <p className="text-gray-500">
-                Bạn chớ nên bỏ cuộc khi bạn vẫn còn điều gì đó để cho đi. Không có gì là hoàn toàn bế tắc, sự việc chỉ
-                thật sự trở nên bế tắc khi bạn thôi không cố gắng nữa.
-              </p>
-              <div>
-                <div className="inline-flex rounded-md shadow-sm" role="group">
-                  <button
-                    type="button"
-                    className="rounded-l-lg border border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-r-lg border-t border-b border-r border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
+        ) : (
+          <div className="mb-10 md:mb-16">
+            <h2 className="mb-4 text-center text-2xl font-bold text-gray-800 md:mb-6 lg:text-3xl">No Data</h2>
           </div>
-          <div className="my-4 flex w-full flex-col items-center overflow-hidden rounded-lg border md:flex-row">
-            <div className="group relative block h-48 w-full shrink-0 self-start overflow-hidden bg-gray-100 md:h-full md:w-32 lg:w-48">
-              <img
-                src="https://images.unsplash.com/photo-1656105544318-1cca8c4d9878?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=687&amp;q=80"
-                loading="lazy"
-                alt="Mất niềm tin vào bản thân, cũng như bạn đánh mất thành công đang đợi mình"
-                className="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110"
-              />
-            </div>
-            <div className="flex flex-col gap-2 p-4 lg:p-6">
-              <span className="text-sm text-gray-400">2022-10-15T11:33</span>
-              <h2 className="text-xl font-bold text-gray-800">
-                Mất niềm tin vào bản thân, cũng như bạn đánh mất thành công đang đợi mình
-              </h2>
-              <p className="text-gray-500">
-                Ai cũng nói tương lai chúng ta luôn rộng mở, nhưng nếu không nắm bắt được hiện tại thì tương lai sẽ
-                chẳng có gì.
-              </p>
-              <div>
-                <div className="inline-flex rounded-md shadow-sm" role="group">
-                  <button
-                    type="button"
-                    className="rounded-l-lg border border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-r-lg border-t border-b border-r border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex w-full flex-col items-center overflow-hidden rounded-lg border md:flex-row">
-            <div className="group relative block h-48 w-full shrink-0 self-start overflow-hidden bg-gray-100 md:h-full md:w-32 lg:w-48">
-              <img
-                src="https://images.unsplash.com/photo-1648184217069-34f0a57791bc?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=1471&amp;q=80"
-                loading="lazy"
-                alt="Nơi nào có ý chí, nơi đó có con đường."
-                className="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110"
-              />
-            </div>
-            <div className="flex flex-col gap-2 p-4 lg:p-6">
-              <span className="text-sm text-gray-400">2022-10-16T11:35</span>
-              <h2 className="text-xl font-bold text-gray-800">Nơi nào có ý chí, nơi đó có con đường.</h2>
-              <p className="text-gray-500">
-                Tôi có thể chấp nhận thất bại, mọi người đều thất bại ở một việc gì đó. Nhưng tôi không chấp nhận việc
-                không cố gắng.
-              </p>
-              <div>
-                <div className="inline-flex rounded-md shadow-sm" role="group">
-                  <button
-                    type="button"
-                    className="rounded-l-lg border border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-r-lg border-t border-b border-r border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

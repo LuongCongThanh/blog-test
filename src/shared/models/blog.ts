@@ -19,13 +19,3 @@ export class Blogs {
     this.updated_at = data.updated_at || "";
   }
 }
-
-export interface PaginationParams {
-  page: number;
-  offset: number;
-}
-
-export interface ListResponse<T> {
-  data: T[];
-  pagination: PaginationParams;
-}

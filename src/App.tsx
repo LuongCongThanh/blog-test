@@ -1,33 +1,48 @@
 import React, { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import BlogDetail from "./pages/blog/containers/BlogDetail";
 
 const BlogsList = lazy(() => import("./pages/blog/containers/BlogList"));
 const BlogsCreate = lazy(() => import("./pages/blog/containers/BlogCreate"));
 
 const App = () => {
   return (
-    <div className="app">
-      <Routes>
-        <Route index element={<BlogsList />} />
-        <Route
-          path="about"
-          element={
-            <Suspense fallback={<>...</>}>
-              <BlogsCreate />
-            </Suspense>
-          }
-        />
-        {/*<Route*/}
-        {/*  path="cccc"*/}
-        {/*  element={*/}
-        {/*    <React.Suspense fallback={<>...</>}>*/}
-        {/*      <aaaaaa />*/}
-        {/*    </React.Suspense>*/}
-        {/*  }*/}
-        {/*/>*/}
-        {/*<Route path="*" element={<vvvvv />} />*/}
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="*" element={<Navigate to="/blog-list" replace />} />
+      <Route
+        path="/blog-list"
+        index
+        element={
+          <Suspense fallback={<>...</>}>
+            <BlogsList />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/create-blog"
+        element={
+          <Suspense fallback={<>...</>}>
+            <BlogsCreate />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/blog-detail/:id"
+        element={
+          <Suspense fallback={<>...</>}>
+            <BlogDetail />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/edit-blog/:id"
+        element={
+          <Suspense fallback={<>...</>}>
+            <BlogsCreate />
+          </Suspense>
+        }
+      />
+    </Routes>
   );
 };
 

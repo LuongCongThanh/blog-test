@@ -1,11 +1,8 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import rootSaga from "./rootSaga";
 import createSagaMiddleware from "redux-saga";
-import blogReducer from "./pages/blog/blogSlice";
-
-const rootReducer = combineReducers({
-  blog: blogReducer
-});
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { rootReducer } from "./rootReducer";
 
 const sagaMiddleware = createSagaMiddleware();
 export const store = configureStore({
@@ -15,5 +12,8 @@ export const store = configureStore({
 
 sagaMiddleware.run(rootSaga);
 
-export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+export const useAppDispatch = () => useDispatch<AppDispatch>();
